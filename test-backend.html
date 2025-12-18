@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste do Backend - Sorteio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        .success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .warning {
+            background: #f59e0b;
+            color: white;
+        }
+
+        button {
+            background: linear-gradient(135deg, #8a50ff, #e8527d);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        pre {
+            background: #2d2d44;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        h1 {
+            color: #8a50ff;
+        }
+
+        h2 {
+            color: #e8527d;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🧪 Teste do Backend - Sistema de Sorteio</h1>
+
+    <div id="status" class="status warning">
+        ⏳ Aguardando teste...
+    </div>
+
+    <h2>Instruções:</h2>
+    <ol>
+        <li>Abra um terminal e execute:
+            <pre>cd /home/patreze/dev/sorteio/backend
+pip install -r requirements.txt
+python main.py</pre>
+        </li>
+        <li>Clique no botão abaixo para testar se o backend está rodando:</li>
+    </ol>
+
+    <button onclick="testBackend()">🔍 Testar Backend</button>
+    <button onclick="testFullFlow()">🎲 Testar Fluxo Completo</button>
+
+    <div id="results"></div>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        async function testBackend() {
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+
+            status.className = 'status warning';
+            status.textContent = '⏳ Testando conexão com o backend...';
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+
+                status.className = 'status success';
+                status.textContent = '✅ Backend está rodando!';
+                results.innerHTML = `
+                    <h3>Resposta do servidor:</h3>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <p>✅ API Version: ${data.version}</p>
+                    <p>✅ Documentação disponível em: <a href="${API_URL}/docs" target="_blank">${API_URL}/docs</a></p>
+                `;
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '❌ Backend não está rodando!';
+                results.innerHTML = `
+                    <h3>Erro:</h3>
+                    <pre>${error.message}</pre>
+                    <p>⚠️ Certifique-se de que o backend está rodando na porta 8000</p>
+                `;
+            }
+        }
+
+        async function testFullFlow() {
+            const status = document.getElementById('status');
+            const results = document.getElementById('results');
+
+            status.className = 'status warning';
+            status.textContent = '⏳ Executando teste completo...';
+            results.innerHTML = '<h3>Executando testes...</h3>';
+
+            const log = [];
+
+            try {
+                // Test 1: Create participant
+                log.push('📝 Criando participante...');
+                const participant = await fetch(`${API_URL}/api/participants/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'João Teste',
+                        email: `teste${Date.now()}@email.com`,
+                        phone: '(11) 98765-4321'
+                    })
+                }).then(r => r.json());
+                log.push(`✅ Participante criado: ${participant.name} (ID: ${participant.id})`);
+
+                // Test 2: Create raffle
+                log.push('🎫 Criando sorteio...');
+                const raffle = await fetch(`${API_URL}/api/raffles/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: 'Teste Automático',
+                        description: 'Sorteio de teste'
+                    })
+                }).then(r => r.json());
+                log.push(`✅ Sorteio criado: ${raffle.name} (ID: ${raffle.id})`);
+
+                // Test 3: Assign ticket
+                log.push('🎟️ Atribuindo ingresso...');
+                const tickets = await fetch(`${API_URL}/api/raffles/${raffle.id}/assign-tickets`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tickets: [{
+                            participant_id: participant.id,
+                            ticket_number: '001'
+                        }]
+                    })
+                }).then(r => r.json());
+                log.push(`✅ Ingresso atribuído: #${tickets[0].ticket_number}`);
+
+                // Test 4: Perform draw
+                log.push('🎲 Realizando sorteio...');
+                const drawResult = await fetch(`${API_URL}/api/raffles/${raffle.id}/draw`, {
+                    method: 'POST'
+                }).then(r => r.json());
+                log.push(`✅ Sorteio realizado!`);
+                log.push(`🏆 VENCEDOR: ${drawResult.winner_ticket.participant.name} - Ingresso #${drawResult.winner_ticket.ticket_number}`);
+
+                status.className = 'status success';
+                status.textContent = '✅ Todos os testes passaram!';
+                results.innerHTML = `
+                    <h3>Resultados dos Testes:</h3>
+                    <pre>${log.join('\n')}</pre>
+                    <h3>Dados do Vencedor:</h3>
+                    <pre>${JSON.stringify(drawResult.winner_ticket, null, 2)}</pre>
+                `;
+            } catch (error) {
+                status.className = 'status error';
+                status.textContent = '❌ Erro durante os testes!';
+                results.innerHTML = `
+                    <h3>Log dos Testes:</h3>
+                    <pre>${log.join('\n')}</pre>
+                    <h3>Erro:</h3>
+                    <pre>${error.message}</pre>
+                `;
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,6 @@
+2025/12/11-21:23:39.517 79a3 Reusing MANIFEST /home/patreze/dev/sorteio/backend/browser_data/Default/Local Storage/leveldb/MANIFEST-000001
+2025/12/11-21:23:39.523 79a3 Recovering log #16
+2025/12/11-21:23:39.524 79a3 Reusing old log /home/patreze/dev/sorteio/backend/browser_data/Default/Local Storage/leveldb/000016.log 
+2025/12/11-21:24:45.405 79a5 Level-0 table #19: started
+2025/12/11-21:24:45.410 79a5 Level-0 table #19: 18156 bytes OK
+2025/12/11-21:24:45.415 79a5 Delete type=0 #16

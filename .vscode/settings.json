@@ -1,0 +1,15 @@
+{
+    "terminal.integrated.defaultProfile.windows": "Ubuntu (WSL)",
+    "terminal.integrated.profiles.windows": {
+        "Ubuntu (WSL)": {
+            "path": "wsl.exe",
+            "args": [
+                "-d",
+                "Ubuntu"
+            ]
+        }
+    },
+    "terminal.integrated.env.linux": {
+        "DONT_PROMPT_WSL_INSTALL": "1"
+    }
+}
